@@ -14,6 +14,8 @@ using System.Diagnostics;
 
 namespace Plotregister
 {
+    //public delegate void datedelegata(string value);
+
     public partial class Form1 : Form
     {
         Stopwatch readstw = new Stopwatch();
@@ -30,6 +32,11 @@ namespace Plotregister
         //Mcommand data
         List<string> mcommandlist;
         List<string> ccommanddata;
+        List<string> ccommanddatainterrupt;
+        int wd; //write delay
+        static bool dataatport = false;
+        public delegate void AddDataDelegate(String myString);
+        public AddDataDelegate myDelegate;
 
         public Form1()
         {
@@ -44,7 +51,26 @@ namespace Plotregister
             button4.Enabled = false;
             mcommandlist = new List<string>();
             //ccommanddata = new List<string>();
+            wd = Int32.Parse(textBox2.Text);
+
+            myDelegate = new AddDataDelegate(datafromevent);
         }
+        //write text delay between characters
+//***********************************************************Write delay*********************************************************************
+        private int wdf()//return the write delay
+        {
+            int j;
+            if (Int32.TryParse(textBox2.Text, out j))
+            {
+                wd = j;
+                return wd;
+            }
+            else
+                richTextBox1.AppendText("Only integers for delays.");
+
+            return wd;
+        }
+//***********************************************************Filter listbox choices************************************************************
         //find the serial item in the listbox
         private void listBox1_SelectedIndexChanged(object sender, EventArgs e)
         {
@@ -60,7 +86,8 @@ namespace Plotregister
             else if(theport.IsOpen)
             {
                 theport.Close();//Close the port
-                richTextBox1.AppendText("The port current port will be closed: " + theport.PortName + "\r");
+                richTextBox1.AppendText("The port current port will be closed: "
+                    + theport.PortName + "\r");
                 setupport(item);//setup a new port
                 richTextBox1.AppendText(" New port created: " + theport.PortName);
                 button2.Enabled = true;//The M command button
@@ -70,13 +97,14 @@ namespace Plotregister
             {
                 theport = null;
                 setupport(item);//setup a new port
-                richTextBox1.AppendText("This port was selected previously but was not open: " + theport.PortName  + "\r");
+                richTextBox1.AppendText("This port was selected previously but was not open: "
+                    + theport.PortName  + "\r");
                 richTextBox1.AppendText("Are you playing....? Is this Phillip? \r");
                 button2.Enabled = true;//The M command button
                 button2.PerformClick();
             }
         }
-
+//***********************************************************Serial port setup here************************************************
         private void setupport(string portname)
         {
             theport = new SerialPort(portname, 115200);//hardcoded  boadrate, will always stay the same
@@ -84,6 +112,23 @@ namespace Plotregister
             theport.StopBits = StopBits.One;
             theport.DataBits = 8;
             theport.RtsEnable = false;
+
+            theport.DataReceived += new SerialDataReceivedEventHandler(DataReceivedHandler);//Add event to the handler
+        }
+//************************************************interrupt for data at port********************************************************
+        private static void DataReceivedHandler(object sender, SerialDataReceivedEventArgs e)
+        {
+            //if there is data on the serial port dataatport true
+            dataatport = true;
+            //SerialPort sp = (SerialPort)sender;
+            //string indata = sp.ReadExisting();
+            //Invo
+            //richTextBox1.AppendText(dataatport.ToString());
+        }
+
+        private void Theport_DataReceived(object sender, SerialDataReceivedEventArgs e)
+        {
+            throw new NotImplementedException();
         }
 
         private void closenullport()
@@ -91,8 +136,8 @@ namespace Plotregister
             theport.Close();
             theport = null;
         }
-
-        //Prompt: Find the Prompt
+    
+//***********************************************************Find the prompt****************************************************
         private bool findprompt()
         {
             count += 1;
@@ -113,7 +158,7 @@ namespace Plotregister
             else
                 return false;
         }
-        //M Read: the M command
+//***********************************************************M Read: the M command*********************************************
         private void readmcommand()
         {
             int breakout = 0;
@@ -184,7 +229,7 @@ namespace Plotregister
             sendcommand(ccommand);
 
         }
-        //C command send here
+        //*******************************Send C command**********************************************************
         private async void sendcommand(string stringcommand)
         {
 
@@ -209,16 +254,22 @@ namespace Plotregister
                     {
                         vstring = v.ToString();
                         theport.Write(vstring);
-                        //Thread.Sleep(1);//does nto seem that i need a delay
-                        await Task.Delay(2);
+                        //Thread.Sleep(wdf());//does nto seem that i need a delay
+                        await Task.Delay(wdf());
                     }
+                    //Thread.Sleep(1);
+                    await Task.Delay(wdf());
                     theport.Write("\r");//write this to enter the text
-                    await Task.Delay(1);
+                    await Task.Delay(wdf());
                     //Thread.Sleep(1);//does not seem that i need this delay
                     theport.Write("s");//write this to enter the text
-                    await Task.Delay(2);
-                //    readccommand();//Sit and wait for the data
-                    test();
+                    //Thread.Sleep(1);
+                    await Task.Delay(wdf());
+                    //    readccommand();//Sit and wait for the data
+                    //I want to use the interrupt functionality so set data at port to false
+                    dataatport = false;
+                    monitorbooldata();
+                    //readccommand();
                 }
                 else
                 {
@@ -229,34 +280,40 @@ namespace Plotregister
             theport.Close();
             button4.Enabled = true;
         }
-
-        void test()
+//****************************************** check if data at port true*******************************
+        private void monitorbooldata()
         {
-            int breakout = 0;
-            string v = "";
-            //check that the data count keeps on changing, else done
-            Thread.Sleep(50);
-            while (theport.BytesToRead != 0)
+            int count = 0;
+            while(!dataatport)
             {
-                v += theport.ReadExisting();
-                Thread.Sleep(50);
-                breakout += 1;
-
-                if (breakout > 100)//a big number to stop working
+                richTextBox1.AppendText(".");
+                Task.Delay(20);
+                //await Task.Delay(20);
+                count += 1;
+                if (count > 60)//If more than 90ms return with nothing
                 {
-                    richTextBox1.AppendText("No data found in 100ms");
+                    richTextBox1.AppendText("!");
+                    richTextBox1.AppendText("Waited to long");
+                    count = 0;
                     return;
                 }
             }
-            int numberofbytes = theport.BytesToRead;
-
+            //richTextBox1.AppendText(dataatport.ToString() + "!");
+            readccommand();
+        }
+        //this is called from the interrupt
+        private void datafromevent(string ccommandvalues)
+        {
             ccommanddata = new List<string>();
-            ccommanddata = v.Split('\r').ToList();//Plit the c command data on \r into a list
+            ccommanddata = ccommandvalues.Split('\r').ToList();//Plit the c command data on \r into a list
 
-            if (ccommanddata.Count > 3)
+            if (ccommanddata.Count > 3)//The first 3 values are sent data. remove it
             {
+                if (ccommanddata[0].Contains("?")) richTextBox1.AppendText("Found ? in data, make write delay bigger \r");
                 ccommanddata.RemoveAt(0);//TODO: find fore intelligent way to remove this
+                if (ccommanddata[0].Contains("?")) richTextBox1.AppendText("Found ? in data, make write delay bigger \r");
                 ccommanddata.RemoveAt(0);//TODO: find fore intelligent way to remove this
+                if (ccommanddata[0].Contains("?")) richTextBox1.AppendText("Found ? in data, make write delay bigger \r");
                 ccommanddata.RemoveAt(0);//TODO: find fore intelligent way to remove this
             }
             else
@@ -267,94 +324,100 @@ namespace Plotregister
             }
             for (int i = 0; i < ccommanddata.Count; i++)
             {
-                if (ccommanddata[i].Contains(">"))
+                if (ccommanddata[i].Contains(">"))//Do want prompts in the data
                 {
                     richTextBox1.Clear();
                     richTextBox1.AppendText("Error: Unwanted characters!");
                     ccommanddata.Clear();
                     return;
                 }
-                if (ccommanddata[i].Length < 3)//if the data is shorter tham length then it is invalid
+                if (ccommanddata[i].Length < 4)//if the data is shorter tham length then it is invalid
                     ccommanddata.RemoveAt(i);
                 else
                     ccommanddata[i] = ccommanddata[i].Substring(1);//remove the \n character
             }
-            readstw.Stop();
-            richTextBox1.AppendText("Elapsed time to read port: " + readstw.ElapsedMilliseconds.ToString());
-            readstw.Reset();
-            //foreach (string st in ccommanddata)
-            //    richTextBox1.AppendText(st + "\r");
-            //Check if the is anough data coming out
+
+            richTextBox1.AppendText("Elapsed time, Read port: " + readstw.ElapsedMilliseconds.ToString() + "\r");//Stop watch out put
+
             if (ccommanddata.Count > 250)
                 plotcdata();
             else
                 richTextBox1.AppendText("The capture command failed, less than 250 values");
+
+            richTextBox1.AppendText("Elapsed time, Plot data: " + readstw.ElapsedMilliseconds.ToString() + "\r");//Stop watch out put
+            readstw.Stop();
+            readstw.Reset();
             //  textBox.AppendText(v);
             richTextBox1.AppendText("The amount of data capture was: " + ccommanddata.Count.ToString() + "\r");
+            //theport.DataReceived
         }
-        //C command read here
+        //Read data from the asic
         private void readccommand()
         {
-            readstw.Start();
+            readstw.Start();//Stropwat to measure read time
             int breakout = 0;
-            int initialamount = theport.BytesToRead;//setup the start ampunt to compare against
-            int lateramount = 0;
+            string v = "";//This will be the total value from the port
             //check that the data count keeps on changing, else done
-            while (initialamount != lateramount)
+            //Thread.Sleep(50);
+            while (theport.BytesToRead != 0)
             {
-                initialamount = theport.BytesToRead;//loohow much data available
-                Thread.Sleep(50);
-                lateramount = theport.BytesToRead;//look again until equal
+                v += theport.ReadExisting();
+                Thread.Sleep(20);
                 breakout += 1;
-                if (breakout > 10000)//a big number to stop working
+
+                if (breakout > 100)//a big number to stop working
                 {
                     richTextBox1.AppendText("No data found in 100ms");
-                    return;
                 }
             }
             int numberofbytes = theport.BytesToRead;
-            string v = theport.ReadExisting();
+
             ccommanddata = new List<string>();
             ccommanddata = v.Split('\r').ToList();//Plit the c command data on \r into a list
-            if (ccommanddata.Count > 3)
+
+            if (ccommanddata.Count > 3)//The first 3 values are sent data. remove it
             {
+                if (ccommanddata[0].Contains("?")) richTextBox1.AppendText("Found ? in data, make write delay bigger \r");
                 ccommanddata.RemoveAt(0);//TODO: find fore intelligent way to remove this
+                if (ccommanddata[0].Contains("?")) richTextBox1.AppendText("Found ? in data, make write delay bigger \r");
                 ccommanddata.RemoveAt(0);//TODO: find fore intelligent way to remove this
+                if (ccommanddata[0].Contains("?")) richTextBox1.AppendText("Found ? in data, make write delay bigger \r");
                 ccommanddata.RemoveAt(0);//TODO: find fore intelligent way to remove this
             }
             else
             {
-                foreach(string str in ccommanddata)
+                foreach (string str in ccommanddata)
                     richTextBox1.AppendText(str);
                 richTextBox1.AppendText("Does not seem like any data out of the port!!");
             }
             for (int i = 0; i < ccommanddata.Count; i++)
             {
-                if(ccommanddata[i].Contains(">"))
+                if (ccommanddata[i].Contains(">"))//Do want prompts in the data
                 {
                     richTextBox1.Clear();
                     richTextBox1.AppendText("Error: Unwanted characters!");
                     ccommanddata.Clear();
                     return;
                 }
-                if (ccommanddata[i].Length < 3)//if the data is shorter tham length then it is invalid
+                if (ccommanddata[i].Length < 4)//if the data is shorter tham length then it is invalid
                     ccommanddata.RemoveAt(i);
                 else
                     ccommanddata[i] = ccommanddata[i].Substring(1);//remove the \n character
             }
-            readstw.Stop();
-            richTextBox1.AppendText("Elapsed time to read port: " + readstw.ElapsedMilliseconds.ToString());
-            readstw.Reset();
-            //foreach (string st in ccommanddata)
-            //    richTextBox1.AppendText(st + "\r");
-            //Check if the is anough data coming out
+
+            richTextBox1.AppendText("Elapsed time, Read port: " + readstw.ElapsedMilliseconds.ToString() + "\r");//Stop watch out put
+
             if (ccommanddata.Count > 250)
                 plotcdata();
             else
                 richTextBox1.AppendText("The capture command failed, less than 250 values");
+
+            richTextBox1.AppendText("Elapsed time, Plot data: " + readstw.ElapsedMilliseconds.ToString() + "\r");//Stop watch out put
+            readstw.Stop();
+            readstw.Reset();
             //  textBox.AppendText(v);
             richTextBox1.AppendText("The amount of data capture was: " + ccommanddata.Count.ToString() + "\r");
-
+            //theport.DataReceived
         }
 
         private void chartdefaults()
@@ -405,7 +468,7 @@ namespace Plotregister
                         chart1.Series[chartseries].Points.AddXY(Convert.ToInt32(splitlist[0], 16), Convert.ToInt32(splitlist[1], 16));
                 }
                 else
-                    richTextBox1.AppendText("\r The was a plot designator without a value in plotcdata()!\r");
+                    richTextBox1.AppendText("\r There was a plot designator without a value in plotcdata()!\r");
             }
 
         }
