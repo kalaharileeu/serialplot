@@ -80,6 +80,7 @@
             this.textBox1.Name = "textBox1";
             this.textBox1.Size = new System.Drawing.Size(71, 20);
             this.textBox1.TabIndex = 2;
+            this.textBox1.Text = "F3A8";
             // 
             // label1
             // 

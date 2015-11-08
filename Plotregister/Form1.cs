@@ -32,10 +32,11 @@ namespace Plotregister
         //Mcommand data
         List<string> mcommandlist;
         List<string> ccommanddata;
-        List<string> ccommanddatainterrupt;
+        //List<string> ccommanddatainterrupt;
         int wd; //write delay
         static bool dataatport = false;
         public delegate void AddDataDelegate(String myString);
+
         public AddDataDelegate myDelegate;
 
         public Form1()
@@ -52,7 +53,8 @@ namespace Plotregister
             mcommandlist = new List<string>();
             //ccommanddata = new List<string>();
             wd = Int32.Parse(textBox2.Text);
-
+            comboBox1.SelectedItem = comboitemphase.Item1;//set defaults in combobox1
+            comboBox2.SelectedItem = comboitemtwo.Item1;//set defaults in combobox2
             myDelegate = new AddDataDelegate(datafromevent);
         }
         //write text delay between characters
@@ -99,7 +101,7 @@ namespace Plotregister
                 setupport(item);//setup a new port
                 richTextBox1.AppendText("This port was selected previously but was not open: "
                     + theport.PortName  + "\r");
-                richTextBox1.AppendText("Are you playing....? Is this Phillip? \r");
+                richTextBox1.AppendText("error \r");
                 button2.Enabled = true;//The M command button
                 button2.PerformClick();
             }
