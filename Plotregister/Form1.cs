@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
 using System.Drawing;
 using System.IO.Ports;
 using System.Linq;
@@ -472,7 +470,8 @@ namespace Plotregister
                 else
                     richTextBox1.AppendText("\r There was a plot designator without a value in plotcdata()!\r");
             }
-
         }
+
+
     }
 }
