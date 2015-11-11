@@ -52,13 +52,16 @@
             this.label4 = new System.Windows.Forms.Label();
             this.textBox3 = new System.Windows.Forms.TextBox();
             this.groupBox4 = new System.Windows.Forms.GroupBox();
-            this.richTextBox2 = new System.Windows.Forms.RichTextBox();
             this.button5 = new System.Windows.Forms.Button();
+            this.richTextBox2 = new System.Windows.Forms.RichTextBox();
+            this.groupBox5 = new System.Windows.Forms.GroupBox();
+            this.textBox4 = new System.Windows.Forms.TextBox();
             this.groupBox1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.chart1)).BeginInit();
             this.groupBox2.SuspendLayout();
             this.groupBox3.SuspendLayout();
             this.groupBox4.SuspendLayout();
+            this.groupBox5.SuspendLayout();
             this.SuspendLayout();
             // 
             // comboBox1
@@ -132,7 +135,7 @@
             this.groupBox1.Size = new System.Drawing.Size(153, 241);
             this.groupBox1.TabIndex = 6;
             this.groupBox1.TabStop = false;
-            this.groupBox1.Text = "Controls";
+            this.groupBox1.Text = "Capture";
             // 
             // button4
             // 
@@ -262,40 +265,58 @@
             // 
             // groupBox4
             // 
-            this.groupBox4.Controls.Add(this.button5);
-            this.groupBox4.Controls.Add(this.richTextBox2);
             this.groupBox4.Controls.Add(this.textBox3);
             this.groupBox4.Location = new System.Drawing.Point(1071, 82);
             this.groupBox4.Name = "groupBox4";
-            this.groupBox4.Size = new System.Drawing.Size(132, 196);
+            this.groupBox4.Size = new System.Drawing.Size(132, 51);
             this.groupBox4.TabIndex = 18;
             this.groupBox4.TabStop = false;
             this.groupBox4.Text = "Power factor";
             // 
+            // button5
+            // 
+            this.button5.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(128)))), ((int)(((byte)(128)))));
+            this.button5.Location = new System.Drawing.Point(1086, 210);
+            this.button5.Name = "button5";
+            this.button5.Size = new System.Drawing.Size(100, 82);
+            this.button5.TabIndex = 19;
+            this.button5.Text = "Enter";
+            this.button5.UseVisualStyleBackColor = false;
+            this.button5.Click += new System.EventHandler(this.button5_Click);
+            // 
             // richTextBox2
             // 
-            this.richTextBox2.Location = new System.Drawing.Point(15, 74);
+            this.richTextBox2.Location = new System.Drawing.Point(1086, 319);
             this.richTextBox2.Name = "richTextBox2";
             this.richTextBox2.Size = new System.Drawing.Size(100, 107);
             this.richTextBox2.TabIndex = 18;
             this.richTextBox2.Text = "";
             // 
-            // button5
+            // groupBox5
             // 
-            this.button5.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(192)))), ((int)(((byte)(255)))), ((int)(((byte)(192)))));
-            this.button5.Location = new System.Drawing.Point(29, 45);
-            this.button5.Name = "button5";
-            this.button5.Size = new System.Drawing.Size(75, 23);
-            this.button5.TabIndex = 19;
-            this.button5.Text = "Enter";
-            this.button5.UseVisualStyleBackColor = false;
-            this.button5.Click += new System.EventHandler(this.button5_Click);
+            this.groupBox5.Controls.Add(this.textBox4);
+            this.groupBox5.Location = new System.Drawing.Point(1073, 139);
+            this.groupBox5.Name = "groupBox5";
+            this.groupBox5.Size = new System.Drawing.Size(130, 61);
+            this.groupBox5.TabIndex = 19;
+            this.groupBox5.TabStop = false;
+            this.groupBox5.Text = "Command";
+            // 
+            // textBox4
+            // 
+            this.textBox4.Location = new System.Drawing.Point(13, 28);
+            this.textBox4.Name = "textBox4";
+            this.textBox4.Size = new System.Drawing.Size(100, 20);
+            this.textBox4.TabIndex = 0;
             // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1226, 753);
+            this.Controls.Add(this.richTextBox2);
+            this.Controls.Add(this.button5);
+            this.Controls.Add(this.groupBox5);
             this.Controls.Add(this.groupBox4);
             this.Controls.Add(this.label4);
             this.Controls.Add(this.textBox2);
@@ -315,6 +336,8 @@
             this.groupBox3.ResumeLayout(false);
             this.groupBox4.ResumeLayout(false);
             this.groupBox4.PerformLayout();
+            this.groupBox5.ResumeLayout(false);
+            this.groupBox5.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -344,6 +367,8 @@
         private System.Windows.Forms.GroupBox groupBox4;
         private System.Windows.Forms.RichTextBox richTextBox2;
         private System.Windows.Forms.Button button5;
+        private System.Windows.Forms.GroupBox groupBox5;
+        private System.Windows.Forms.TextBox textBox4;
     }
 }
 
