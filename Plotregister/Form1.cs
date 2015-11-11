@@ -229,6 +229,40 @@ namespace Plotregister
             sendcommand(ccommand);
 
         }
+        //*******************************Send list of general command************************************************
+        private async void sendgeneralcommand(List<string> stringcommand)
+        {
+            richTextBox2.Clear();
+            if (theport != null)
+                theport.Open();
+            else
+            {
+                richTextBox1.Clear();
+                richTextBox1.AppendText("Error: Try again. The serial port is NULL, not initiated!");
+                return;
+            }
+            foreach (string vstring in stringcommand)
+            {
+                if (findprompt())
+                {
+                    foreach (char v in vstring)
+                    {
+                        theport.Write(v.ToString());
+                        //Thread.Sleep(wdf());//does nto seem that i need a delay
+                        await Task.Delay(wdf());
+                    }
+                    //Thread.Sleep(1);
+                    await Task.Delay(wdf());
+                    //I want to use the interrupt functionality so set data at port to false
+                }
+                else
+                {
+                    richTextBox1.Clear();
+                    richTextBox1.AppendText("error: Could not find the prompt!");
+                }
+            }
+            theport.Close();
+        }
         //*******************************Send C command**********************************************************
         private async void sendcommand(string stringcommand)
         {
@@ -354,7 +388,7 @@ namespace Plotregister
         //Read data from the asic
         private void readccommand()
         {
-            readstw.Start();//Stropwat to measure read time
+            readstw.Start();//Stopwatch to measure read time
             int breakout = 0;
             string v = "";//This will be the total value from the port
             //check that the data count keeps on changing, else done
@@ -422,6 +456,7 @@ namespace Plotregister
 
         private void chartdefaults()
         {
+            //reset defaults values that I want for the chart
             chart1.ChartAreas[0].BackColor = Color.White;
             chart1.Series.Clear();
             chart1.Titles.Clear();
@@ -471,7 +506,5 @@ namespace Plotregister
                     richTextBox1.AppendText("\r There was a plot designator without a value in plotcdata()!\r");
             }
         }
-
-
     }
 }
