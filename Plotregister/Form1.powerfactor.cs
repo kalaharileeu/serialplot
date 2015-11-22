@@ -15,31 +15,7 @@ namespace Plotregister
             else
                 return "00";
         }
-        //Request a reactive power
-        private void button5_Click(object sender, EventArgs e)
-        {
-            //the list of command to be sent to the inverter
-            listofcommands = new List<string>();
-            //gets the value from the textbos and convert it to float
-            float floatvalue;// = (float)Convert.ToDouble(textBox3.Text);
-            //gets a bool value from the conversion to check if it is valid
-            bool valid = float.TryParse(textBox3.Text.ToString(), out floatvalue);
-            if(valid)
-            {
-                processpfrequest(floatvalue);
-            }
-            else
-            {
-                richTextBox2.AppendText("nofloat, moving on");
-            }
 
-            if (textBox4.Text != "")
-            {
-                listofcommands = new List<string>();
-                listofcommands.Add(textBox4.Text.Trim() + "\r");
-            }
-
-        }
         //processes the value from the textbos and send the command list to the write function
         private void processpfrequest(float pffloatvalue)
         {

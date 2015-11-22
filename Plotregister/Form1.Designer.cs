@@ -56,6 +56,7 @@
             this.richTextBox2 = new System.Windows.Forms.RichTextBox();
             this.groupBox5 = new System.Windows.Forms.GroupBox();
             this.textBox4 = new System.Windows.Forms.TextBox();
+            this.comboBox3 = new System.Windows.Forms.ComboBox();
             this.groupBox1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.chart1)).BeginInit();
             this.groupBox2.SuspendLayout();
@@ -276,7 +277,7 @@
             // button5
             // 
             this.button5.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(128)))), ((int)(((byte)(128)))));
-            this.button5.Location = new System.Drawing.Point(1086, 210);
+            this.button5.Location = new System.Drawing.Point(1086, 262);
             this.button5.Name = "button5";
             this.button5.Size = new System.Drawing.Size(100, 82);
             this.button5.TabIndex = 19;
@@ -286,7 +287,7 @@
             // 
             // richTextBox2
             // 
-            this.richTextBox2.Location = new System.Drawing.Point(1086, 319);
+            this.richTextBox2.Location = new System.Drawing.Point(1086, 359);
             this.richTextBox2.Name = "richTextBox2";
             this.richTextBox2.Size = new System.Drawing.Size(100, 107);
             this.richTextBox2.TabIndex = 18;
@@ -309,11 +310,20 @@
             this.textBox4.Size = new System.Drawing.Size(100, 20);
             this.textBox4.TabIndex = 0;
             // 
+            // comboBox3
+            // 
+            this.comboBox3.FormattingEnabled = true;
+            this.comboBox3.Location = new System.Drawing.Point(1082, 224);
+            this.comboBox3.Name = "comboBox3";
+            this.comboBox3.Size = new System.Drawing.Size(104, 21);
+            this.comboBox3.TabIndex = 20;
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1226, 753);
+            this.Controls.Add(this.comboBox3);
             this.Controls.Add(this.richTextBox2);
             this.Controls.Add(this.button5);
             this.Controls.Add(this.groupBox5);
@@ -369,6 +379,7 @@
         private System.Windows.Forms.Button button5;
         private System.Windows.Forms.GroupBox groupBox5;
         private System.Windows.Forms.TextBox textBox4;
+        private System.Windows.Forms.ComboBox comboBox3;
     }
 }
 
