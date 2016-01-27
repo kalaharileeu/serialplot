@@ -28,6 +28,8 @@ namespace Plotregister
             {
                 if (findprompt())
                 {
+                    //found the prompt, enable buttton4
+                    button4.Enabled = true;
                     theport.Write("M");
                     Thread.Sleep(2);//Sleep 5ms, could make it 1
                     readmcommand();

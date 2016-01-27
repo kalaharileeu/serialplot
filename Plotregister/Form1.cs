@@ -24,13 +24,14 @@ namespace Plotregister
         Tuple<string, string> comboitemone = new Tuple<string, string>("1", "1");
         Tuple<string, string> comboitemtwo = new Tuple<string, string>("2", "2");
         Tuple<string, string> comboitemthree = new Tuple<string, string>("3", "3");
-        //Serial port here
+        //Serial port settings here and serial event setup
         SerialPort theport;
+        static string ccommandeventdata;
         //Mcommand data
         List<string> mcommandlist;
         List<string> ccommanddata;
         //List<string> ccommanddatainterrupt;
-        static string ccommandeventdata;
+
         int wd; //write delay
         static bool dataatport = false;
         public delegate void AddDataDelegate(String myString);
@@ -116,21 +117,30 @@ namespace Plotregister
             //theport.DataReceived += new SerialDataReceivedEventHandler(CDataReceivedHandler);//Add event to the handler
             //theport.DataReceived -= DataReceivedHandler;//Cance subscription
         }
-//************************************************interrupt for data at port********************************************************
-        private static void CDataReceivedHandler(object sender, SerialDataReceivedEventArgs e)
+//************************************************EVENT for data at port********************************************************
+        public virtual void CDataReceivedHandler(object sender, SerialDataReceivedEventArgs e)
         {
             //if there is data on the serial port dataatport true
             //dataatport = true;//This worrked
+
             SerialPort sp = (SerialPort)sender;
             string indata = sp.ReadExisting();
-            Console.WriteLine("Data Received:");
-            Console.Write(indata);
+            ccommandeventdata += indata;
+            checkifdatacomplete(ccommandeventdata);
         }
-
-         //private void Theport_DataReceived(object sender, SerialDataReceivedEventArgs e)
-        //{
-        //    throw new NotImplementedException();
-        //}
+///the below code check that there is two prompts in the data, this is a coocuring pattern of ">"
+/// It then knows that all the data is there then calls a action delegate
+        private void checkifdatacomplete(string incompletecdata)//EVENT function driven to find data finish pattern
+        {
+            int count = incompletecdata.Count(f => f == '>');
+            if (count == 2)
+            {
+                //Setup the action delegate and lambda expression
+                Action action = () => processccommand(incompletecdata);//Process the data and plot it
+                this.BeginInvoke(action);//Getout of the Eventthread
+                theport.DataReceived -= CDataReceivedHandler;
+            }
+        }
 
         private void closenullport()
         {
@@ -226,7 +236,8 @@ namespace Plotregister
             stringcommand.Trim();// removes leading and trailing whitespace
             richTextBox1.Clear();
             if(theport != null)
-                theport.Open();
+                if(!theport.IsOpen)
+                    theport.Open();
             else
             {
                 richTextBox1.Clear();
@@ -238,10 +249,6 @@ namespace Plotregister
             {
                 if (findprompt())
                 {
-                    //*****************SUBSCRIBE HERE***************************
-                    //ready to send command subscribe to the datareived
-                    ccommandeventdata = "";
-                    theport.DataReceived += new SerialDataReceivedEventHandler(CDataReceivedHandler);//Add event to the handler
                     foreach (char v in stringcommand)
                     {
                         vstring = v.ToString();
@@ -255,12 +262,17 @@ namespace Plotregister
                     await Task.Delay(wdf());
                     //Thread.Sleep(1);//does not seem that i need this delay
                     theport.Write("s");//write this to enter the text
-                    theport.DataReceived += new SerialDataReceivedEventHandler(CDataReceivedHandler);//Add event to the handler
                     await Task.Delay(wdf());
-                    //    readccommand();//Sit and wait for the data
+                    //Subscribe to the Eventhandler
+                    //*****************SUBSCRIBE HERE***************************
+                    //ready to send command subscribe to the datareived
+                    ccommandeventdata = "";
+                    theport.DataReceived += new SerialDataReceivedEventHandler(CDataReceivedHandler);//Add event to the handler
+                    //readstw.Start();
+                    //readccommand();//Sit and wait for the data
                     //I want to use the interrupt functionality so set data at port to false
-                    //dataatport = false;//this works
-                    //monitorbooldata("c");//this works
+                   // dataatport = false;//this works
+                   // monitorbooldata("c");//this works
                 }
                 else
                 {
@@ -325,7 +337,7 @@ namespace Plotregister
 //******************************************************DATA Processing STRATS HERE**********************************************
 //***********************************************Process the C command, sent the C data to this function*************************
         public void processccommand(string v)
-        { 
+        {
             ccommanddata = new List<string>();
             ccommanddata = v.Split('\r').ToList();//Plit the c command data on \r into a list
 
