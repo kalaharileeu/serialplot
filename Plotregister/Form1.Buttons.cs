@@ -8,10 +8,20 @@ namespace Plotregister
 {
     public partial class Form1 : Form
     {
+        //Get the serial ports
+        public static void GetSerialPorts()
+        {
+
+            //button4.Enabled = true;
+            //string[] serialitems = SerialPort.GetPortNames();
+            //foreach (var v in serialitems)
+            //    listBox1.Items.Add(v);
+        }
 
         //Get the serial ports
         private void button1_Click(object sender, EventArgs e)
         {
+            //Find the ports and add it to the listbox
             button4.Enabled = true;
             string[] serialitems = SerialPort.GetPortNames();
             foreach (var v in serialitems)
@@ -21,32 +31,43 @@ namespace Plotregister
         //M button clicked
         private void button2_Click(object sender, EventArgs e)
         {
-            richTextBox1.Clear();
-            if ((!theport.IsOpen) && !(theport == null))
-                theport.Open();
-            if (theport.IsOpen)
+            if (theport != null)
             {
-                if (findprompt())
-                {
-                    //found the prompt, enable buttton4
-                    button4.Enabled = true;
-                    theport.Write("M");
-                    Thread.Sleep(2);//Sleep 5ms, could make it 1
-                    readmcommand();
-                }
-                else
-                {
+                if (richTextBox1.Text != "")
                     richTextBox1.Clear();
-                    richTextBox1.AppendText("error: Could not find the prompt! :" + theport.PortName);
+                if (!theport.IsOpen)
+                    theport.Open();
+                if (theport.IsOpen)
+                {
+                    if (findprompt())
+                    {
+                        //found the prompt, enable buttton4
+                        button4.Enabled = true;
+                        theport.Write("M");
+                        Thread.Sleep(2);//Sleep 5ms, could make it 1
+                        readmcommand();
+                    }
+                    else
+                    {
+                        richTextBox1.Clear();
+                        richTextBox1.AppendText("error: Could not find the prompt! :" + theport.PortName);
+                    }
                 }
+                theport.Close();
             }
-            theport.Close();
+            else
+            {
+                if (richTextBox1.Text != "")
+                    richTextBox1.Clear();
+                richTextBox1.AppendText("The port is NULL. It must be in use!");
+            }
         }
         //click the clear button to clear the richtext box
         private void button3_Click(object sender, EventArgs e)
         {
             richTextBox1.Clear();
-            richTextBox1.AppendText(ccommandeventdata);
+            if(ccommandeventdata != null)
+                richTextBox1.AppendText(ccommandeventdata);
         }
 
         //Cmommand buildler

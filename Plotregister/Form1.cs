@@ -58,8 +58,8 @@ namespace Plotregister
             comboBox2.SelectedItem = comboitemtwo.Item1;//set defaults in combobox2
         }
         //write text delay between characters
-//***********************************************************Write delay*********************************************************************
-        private int wdf()//return the write delay
+//****************************************Write delay******************************************
+        private int wdf()//return user selected write delay
         {
             int j;
             if (Int32.TryParse(textBox2.Text, out j))
@@ -71,7 +71,7 @@ namespace Plotregister
                 richTextBox1.AppendText("Only integers for delays.");
             return wd;
         }
-//***********************************************************Filter listbox choices************************************************************
+//****************************************************check listbox1 port selection************************************************************
         //find the serial item in the listbox
         private void listBox1_SelectedIndexChanged(object sender, EventArgs e)
         {
@@ -117,7 +117,7 @@ namespace Plotregister
             //theport.DataReceived += new SerialDataReceivedEventHandler(CDataReceivedHandler);//Add event to the handler
             //theport.DataReceived -= DataReceivedHandler;//Cance subscription
         }
-//************************************************EVENT for data at port********************************************************
+//**********************************************Handle EVENT for data at port********************************************************
         public virtual void CDataReceivedHandler(object sender, SerialDataReceivedEventArgs e)
         {
             //if there is data on the serial port dataatport true
@@ -125,20 +125,25 @@ namespace Plotregister
 
             SerialPort sp = (SerialPort)sender;
             string indata = sp.ReadExisting();
+            //ccommandentdate is a static string variable
+            //add the indata to ccommandeventdata
             ccommandeventdata += indata;
             checkifdatacomplete(ccommandeventdata);
         }
-///the below code check that there is two prompts in the data, this is a coocuring pattern of ">"
-/// It then knows that all the data is there then calls a action delegate
-        private void checkifdatacomplete(string incompletecdata)//EVENT function driven to find data finish pattern
+        ///the below code check that there is two prompts in the data, this is a occuring pattern of ">"
+        /// It then knows that all the data is there then calls a action delegate
+        /// //EVENT function driven to find data finish pattern
+        private void checkifdatacomplete(string incompletecdata)
         {
             int count = incompletecdata.Count(f => f == '>');
             if (count == 2)
             {
                 //Setup the action delegate and lambda expression
                 Action action = () => processccommand(incompletecdata);//Process the data and plot it
-                this.BeginInvoke(action);//Getout of the Eventthread
-                theport.DataReceived -= CDataReceivedHandler;
+                //Getout of the Eventthread
+                this.BeginInvoke(action);
+                //Remove the event trigger
+                //theport.DataReceived -= CDataReceivedHandler;
             }
         }
 
@@ -183,7 +188,6 @@ namespace Plotregister
                     closenullport();
                     return;
                 }
-
             }
             int numberofbytes = theport.BytesToRead;
             string v = theport.ReadExisting();
@@ -192,11 +196,12 @@ namespace Plotregister
             //foreach(var mstring in mcommandlist)
             richTextBox1.AppendText(v);
         }
-
+        //TODO: implement interrupt here
         //*******************************Send list of general command************************************************
         private async void sendgeneralcommand(List<string> stringcommand)
         {
             richTextBox2.Clear();
+            //If the port is not open and not null
             if ((theport != null) && (!theport.IsOpen)) 
                 theport.Open();
             else
@@ -224,7 +229,7 @@ namespace Plotregister
                 }
             }
             //After the command
-            monitorbooldata(textBox4.Text.Trim());//check for data interrupt
+            monitorbooldata(textBox4.Text.Trim());//TODO: check for data interrupt
             theport.Close();
         }
         //*******************************Send C command**********************************************************
@@ -268,6 +273,7 @@ namespace Plotregister
                     //ready to send command subscribe to the datareived
                     ccommandeventdata = "";
                     theport.DataReceived += new SerialDataReceivedEventHandler(CDataReceivedHandler);//Add event to the handler
+                    richTextBox1.AppendText("I'm listnening");
                     //readstw.Start();
                     //readccommand();//Sit and wait for the data
                     //I want to use the interrupt functionality so set data at port to false
@@ -304,7 +310,7 @@ namespace Plotregister
             //richTextBox1.AppendText(dataatport.ToString() + "!");
             readccommand(commandtype);//Takes the command type and goes read the data
         }
-  //*******************************************Read data from the asic*******************************************************
+  //*******************************************Read data from the asic buffer*******************************************************
         private void readccommand(string commandtype)//Read till the output buffer is 0
         {
             if (theport != null)
